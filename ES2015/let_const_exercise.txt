@@ -1,0 +1,27 @@
+var PI = 3.14;
+PI = 42; // stop me from doing this!
+
+const PI = 3.14;
+//PI = 42 has been stopped from doing this!
+
+Quiz
+
+Difference between var and let?
+
+- var is pre-ES2015, has function scope as opposed to block scope, global var variables can be accessed on the DOM through the window object,
+can be redeclared, and can be used in an earlier line than the declaration thanks to hoisting
+
+Difference between var and const?
+
+- var has function scope, const has block scope;
+- var can be redeclared and redefined, const can only be declared and defined once;
+- var variables can be accessed through window object on DOM, const can't
+
+Difference between let and const?
+
+- let can be redefined, const can only be assigned once(reference types like objects and arrays can be mutated, but not wholly redefined)
+
+What's hoisting?
+
+- The javascript language works by declaring all var variables in each block before moving on to the first line of code inside. This is called hoisting.
+Because of this, var variables can be called before they are ever declared in the block.
