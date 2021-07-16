@@ -26,8 +26,8 @@ class Story {
   getHostName() {
     let slashCount = 0;
     let hostName = '';
-    this.url.split('').forEach(function (c) {
-      if (slashCount === 2 && c !== '/') {
+    this.url.split('').forEach(function (c) { //save this.url.split into const and then use forEach, too breakable
+      if (slashCount === 2 && c !== '/') { // don't use one letter variables ever
         hostName += c;
       }
       if (c === '/') {
@@ -91,9 +91,11 @@ class StoryList {
         story: newStory
       }
     });
-    const story = new Story(response.data.story);
-    $navFavorites.show();
-    return story;
+    if (response.status === 200 || response.status === 201) {
+      const story = new Story(response.data.story);
+      $navFavorites.show();
+      return story;
+    }
   }
 
   async deleteStory(user, storyId) {
@@ -104,7 +106,6 @@ class StoryList {
         token: user.loginToken,
       }
     });
-    console.log(response);
     return response;
   }
 }

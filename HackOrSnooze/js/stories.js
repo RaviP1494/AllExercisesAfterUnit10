@@ -2,11 +2,13 @@
 
 // This is the global list of the stories, an instance of StoryList
 let storyList;
+let stories;
 
 /** Get and show stories when site first loads. */
 
 async function getAndShowStoriesOnStart() {
   storyList = await StoryList.getStories();
+  stories = storyList.stories;
   $storiesLoadingMsg.remove();
 
   putStoriesOnPage();
@@ -38,7 +40,7 @@ function generateStoryMarkup(story) {
 //adds favorite functionality to all stories on all stories for home page
 function addFavoritesToList() {
   console.debug('addFavoritesToList');
-  storyList.stories.forEach(
+  stories.forEach(
     function (story) {
       if (currentUser.favorites.some(fav => fav.storyId === story.storyId)) {
         $(`#${story.storyId}`).prepend(`<i class="fas fa-star"</i>`).on('click', 'i.fa-star', favoriteToggle);
@@ -57,7 +59,7 @@ function putStoriesOnPage() {
   $allStoriesList.empty();
 
   // loop through all of our stories and generate HTML for them
-  for (let story of storyList.stories) {
+  for (let story of stories) {
     const $story = generateStoryMarkup(story);
     $allStoriesList.append($story);
   }
@@ -70,10 +72,14 @@ async function submitStory() {
   const $newStoryTitle = $("#new-story-title").val();
   const $newStoryAuthor = $("#new-story-author").val();
   const $newStoryUrl = $("#new-story-url").val();
-
-  const story = await storyList.addStory(currentUser, { title: $newStoryTitle, author: $newStoryAuthor, url: $newStoryUrl });
-  storyList.stories.unshift(story);
   $storyCreationForm.trigger("reset");
+
+  const response = await storyList.addStory(currentUser, { title: $newStoryTitle, author: $newStoryAuthor, url: $newStoryUrl });
+
+  if (response) {
+    stories.unshift(response);
+  }
+
   hidePageComponents();
   $navFavorites.show();
   putStoriesOnPage();
@@ -83,25 +89,25 @@ async function submitStory() {
 $storyCreationForm.on("submit", submitStory);
 
 //event function for clicking on favorite button
-async function favoriteToggle(e) {
+async function favoriteToggle(el) {
   console.debug('favoriteToggle');
-  if (currentUser.favorites.some(fav => fav.storyId === e.target.parentElement.id)) {
-    await currentUser.deleteFavorite(storyList.stories.find(s => s.storyId === e.target.parentElement.id));
+  if (currentUser.favorites.some(fav => fav.storyId === el.target.parentElement.id)) {
+    await currentUser.deleteFavorite(stories.find(s => s.storyId === el.target.parentElement.id));
   }
   else {
-    await currentUser.addFavorite(storyList.stories.find(s => s.storyId === e.target.parentElement.id));
+    await currentUser.addFavorite(stories.find(s => s.storyId === el.target.parentElement.id));
   }
   putStoriesOnPage();
   addFavoritesToList();
 }
 
 // event function for deleting story
-async function deleteStoryClick(e) {
+async function deleteStoryClick(el) {
   console.debug('deleteStory');
-  const response = await storyList.deleteStory(currentUser, e.target.parentElement.id);
+  const response = await storyList.deleteStory(currentUser, el.target.parentElement.id);
   if (response.status === 200) {
-
     storyList = await StoryList.getStories();
+    stories = storyList.stories;
     putStoriesOnPage();
     addFavoritesToList();
   }
@@ -110,7 +116,7 @@ async function deleteStoryClick(e) {
 // event function to open up stories posted by currentUser, along with trash icon to delete post
 function showCurrentUserStories() {
   $allStoriesList.empty();
-  for (let story of storyList.stories) {
+  for (let story of stories) {
     if (currentUser.username === story.username) {
       const $story = generateStoryMarkup(story);
       $story.prepend('<i class = "fas fa-trash"></i>').on('click', 'i.fa-trash', deleteStoryClick);
